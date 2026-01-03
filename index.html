@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student ToolKit By Mehedi Hasan Shihab</title>
+  <meta name="description" content="Age and GPA/CGPA calculator for Bangladesh students with responsive UI." />
+  <style>
+    :root {
+      --bg: #0f1216; --surface: #151a21; --text: #e6e9ef; --muted: #9aa3af;
+      --primary: #3b82f6; --accent: #22c55e; --danger: #ef4444; --border: #252b36;
+      --focus: #93c5fd; --card: #11161d;
+    }
+    [data-theme="light"] {
+      --bg: #f7f9fc; --surface: #ffffff; --text: #12151a; --muted: #566173;
+      --primary: #2563eb; --accent: #16a34a; --danger: #dc2626; --border: #e5e7eb;
+      --focus: #93c5fd; --card: #ffffff;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; margin: 0; }
+    *, *::before, *::after { box-sizing: border-box; }
+    .MehediContainer { max-width: 980px; margin: 0 auto; padding: 20px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    h1 { font-size: 1.4rem; margin: 0; }
+    .MehediCard { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .ShihabControls { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-top: 12px; }
+    @media (max-width: 640px) { .ShihabControls { grid-template-columns: 1fr; } }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .hint { color: var(--muted); font-size: .9rem; }
+    input, select, button { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); outline: none; }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--focus); }
+    .MehediActions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .btn { cursor: pointer; font-weight: 600; border: 1px solid var(--border); }
+    .btn-primary { background: var(--primary); color: white; border: none; }
+    .btn-secondary { background: var(--surface); }
+    .btn-accent { background: var(--accent); color: white; border: none; }
+    .btn-danger { background: var(--danger); color: white; border: none; }
+    .ShihabTable { width: 100%; border-collapse: collapse; margin-top: 12px; border-radius: 10px; border: 1px solid var(--border); overflow: hidden; }
+    .ShihabTable th { text-align: left; background: var(--card); padding: 10px; }
+    .ShihabTable td { padding: 8px 10px; border-top: 1px solid var(--border); }
+    .ShihabPill { background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; display: inline-block; margin-bottom: 10px; font-weight: 600; }
+    .ShihabGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+    @media (max-width: 640px) { .ShihabGrid { grid-template-columns: 1fr; } }
+    .kv { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+    .kv b { display: block; font-size: 1.2rem; color: var(--primary); }
+    .tool-section { display: none; }
+    .tool-section.active { display: block; }
+    footer { margin-top: 24px; color: var(--muted); font-size: .85rem; text-align: center; border-top: 1px solid var(--border); padding-top: 20px; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="MehediContainer">
+    <header>
+      <h1 id="MehediTitle">Student ToolKit</h1>
+      <div class="lang-theme">
+        <select id="MehediToolSwitcher" style="width: auto; margin-right: 8px; border-color: var(--primary);">
+            <option value="gpa-tool">📊 GPA Calculator</option>
+            <option value="age-tool">📅 Age Calculator</option>
+        </select>
+        <button class="btn btn-secondary" id="MehediToggleTheme" style="width: auto;">Theme</button>
+        <button class="btn btn-secondary" id="MehediToggleLang" style="width: auto;">EN/BN</button>
+        <button class="btn btn-primary" id="MehediExportPDF" style="width: auto;">📄 Export PDF</button>
+      </div>
+    </header>
+
+    <section id="age-tool" class="tool-section">
+        <div class="MehediCard">
+            <div class="ShihabPill">Age Calculator</div>
+            <div class="ShihabControls">
+                <div>
+                    <label id="lblDob">Date of Birth</label>
+                    <input type="date" id="MehediDob" oninput="calculateAge()">
+                </div>
+                <div>
+                    <label id="lblTarget">Age at the Date of</label>
+                    <input type="date" id="MehediAgeAt" oninput="calculateAge()">
+                </div>
+            </div>
+            <div class="ShihabGrid" style="margin-top: 20px;">
+                <div class="kv"><span id="lblYears">Years</span><b id="resYears">0</b></div>
+                <div class="kv"><span id="lblMonths">Months</span><b id="resMonths">0</b></div>
+                <div class="kv"><span id="lblDays">Days</span><b id="resDays">0</b></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gpa-tool" class="tool-section active">
+        <div class="MehediCard">
+            <div id="MehediConfigTitle" class="ShihabPill">Calculator Settings</div>
+            <div class="ShihabControls">
+                <div>
+                    <label>Grading System</label>
+                    <select id="MehediScale">
+                        <option value="ssc_hsc">Bangladesh SSC/HSC (5.0)</option>
+                        <option value="aiub">AIUB University (4.0)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Term Name</label>
+                    <input id="MehediSemesterName" type="text" placeholder="e.g., HSC 2023" />
+                </div>
+                <div>
+                    <label>Local Save</label>
+                    <select id="MehediLocalSave">
+                        <option value="off">Off</option>
+                        <option value="on">On</option>
+                    </select>
+                </div>
+            </div>
+            <div class="MehediActions">
+                <button class="btn btn-secondary" id="MehediReset">Reset</button>
+                <button class="btn btn-accent" id="MehediCopy">Copy Summary</button>
+            </div>
+        </div>
+
+        <div class="MehediCard">
+            <div class="ShihabPill">Subjects</div>
+            <table class="ShihabTable">
+                <thead>
+                    <tr>
+                        <th style="width:30%;">Subject</th>
+                        <th style="width:20%;">Marks</th>
+                        <th style="width:15%;">Credit</th>
+                        <th style="width:10%;">Opt</th>
+                        <th style="width:25%;">Result</th>
+                    </tr>
+                </thead>
+                <tbody id="MehediSubjectsBody"></tbody>
+            </table>
+            <div class="MehediActions">
+                <button class="btn btn-primary" id="MehediAddSubject">+ Add Subject</button>
+            </div>
+        </div>
+
+        <div class="MehediCard">
+            <div class="ShihabPill">Result Summary</div>
+            <div class="ShihabGrid">
+                <div class="kv"><b>GPA</b><span id="MehediGpa">0.00</span></div>
+                <div class="kv"><b>Status</b><span id="MehediFailStatus">Pass</span></div>
+                <div class="kv"><b>Optional Gain</b><span id="MehediOptionalGain">0.00</span></div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+      Built by Mehedi Hasan Shihab &bull; Professional Student Toolkit 2026
+    </footer>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    // --- DYNAMIC GRADING CONFIG ---
+    const SCALES = {
+        ssc_hsc: [
+            { min: 80, gp: 5.0, letter: "A+" }, { min: 70, gp: 4.0, letter: "A" },
+            { min: 60, gp: 3.5, letter: "A-" }, { min: 50, gp: 3.0, letter: "B" },
+            { min: 40, gp: 2.0, letter: "C" },  { min: 33, gp: 1.0, letter: "D" },
+            { min: 0,  gp: 0.0, letter: "F" }
+        ],
+        aiub: [
+            { min: 90, gp: 4.0, letter: "A+" }, { min: 85, gp: 3.75, letter: "A" },
+            { min: 80, gp: 3.5, letter: "B+" }, { min: 75, gp: 3.25, letter: "B" },
+            { min: 70, gp: 3.0, letter: "C+" }, { min: 65, gp: 2.75, letter: "C" },
+            { min: 60, gp: 2.5, letter: "D+" }, { min: 50, gp: 2.25, letter: "D" },
+            { min: 0,  gp: 0.0, letter: "F" }
+        ]
+    };
+
+    // --- TOOL SWITCHING ---
+    const toolSwitcher = document.getElementById('MehediToolSwitcher');
+    toolSwitcher.addEventListener('change', (e) => {
+        document.querySelectorAll('.tool-section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(e.target.value).classList.add('active');
+    });
+
+    // --- AGE CALCULATOR ENGINE ---
+    document.getElementById('MehediAgeAt').valueAsDate = new Date();
+    function calculateAge() {
+        const dob = new Date(document.getElementById('MehediDob').value);
+        const now = new Date(document.getElementById('MehediAgeAt').value);
+        if (isNaN(dob.getTime())) return;
+
+        let years = now.getFullYear() - dob.getFullYear();
+        let months = now.getMonth() - dob.getMonth();
+        let days = now.getDate() - dob.getDate();
+
+        if (days < 0) {
+            months--;
+            const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+            days += lastMonth.getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        document.getElementById('resYears').innerText = years;
+        document.getElementById('resMonths').innerText = months;
+        document.getElementById('resDays').innerText = days;
+    }
+
+    // --- GPA CALCULATOR ENGINE ---
+    let subjects = [];
+    const tableBody = document.getElementById('MehediSubjectsBody');
+
+    function addSubject(name = "", marks = 0, credit = 3, optional = false) {
+        const id = Date.now() + Math.random();
+        subjects.push({ id, name, marks, credit, optional });
+        renderTable();
+    }
+
+    function renderTable() {
+        tableBody.innerHTML = "";
+        subjects.forEach(sub => {
+            const tr = document.createElement('tr');
+            const gradeObj = getGrade(sub.marks);
+            tr.innerHTML = `
+                <td><input type="text" value="${sub.name}" oninput="updateSub(${sub.id}, 'name', this.value)"></td>
+                <td><input type="number" value="${sub.marks}" oninput="updateSub(${sub.id}, 'marks', this.value)"></td>
+                <td><input type="number" value="${sub.credit}" ${document.getElementById('MehediScale').value === 'ssc_hsc' ? 'disabled' : ''} oninput="updateSub(${sub.id}, 'credit', this.value)"></td>
+                <td><input type="checkbox" ${sub.optional ? 'checked' : ''} onchange="updateSub(${sub.id}, 'optional', this.checked)"></td>
+                <td style="font-weight:bold">${gradeObj.gp.toFixed(2)} (${gradeObj.letter})</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        calculateGPA();
+    }
+
+    function getGrade(marks) {
+        const scale = document.getElementById('MehediScale').value;
+        return SCALES[scale].find(s => marks >= s.min) || { gp: 0, letter: "F" };
+    }
+
+    function updateSub(id, field, val) {
+        const sub = subjects.find(s => s.id === id);
+        sub[field] = field === 'marks' || field === 'credit' ? parseFloat(val) || 0 : val;
+        renderTable();
+    }
+
+    function calculateGPA() {
+        const scale = document.getElementById('MehediScale').value;
+        let totalGPA = 0, totalCredits = 0, fail = false, optGain = 0;
+
+        if (scale === 'ssc_hsc') {
+            const compulsory = subjects.filter(s => !s.optional);
+            const optional = subjects.filter(s => s.optional);
+            compulsory.forEach(s => {
+                const g = getGrade(s.marks).gp;
+                if (g === 0) fail = true;
+                totalGPA += g;
+            });
+            optional.forEach(s => {
+                const g = getGrade(s.marks).gp;
+                if (g > 2) optGain += (g - 2);
+            });
+            let res = compulsory.length ? (totalGPA + optGain) / compulsory.length : 0;
+            document.getElementById('MehediGpa').innerText = fail ? "0.00" : Math.min(res, 5).toFixed(2);
+            document.getElementById('MehediFailStatus').innerText = fail ? "Fail" : "Pass";
+            document.getElementById('MehediOptionalGain').innerText = optGain.toFixed(2);
+        } else {
+            subjects.forEach(s => {
+                const g = getGrade(s.marks).gp;
+                totalGPA += (g * s.credit);
+                totalCredits += s.credit;
+            });
+            let res = totalCredits ? totalGPA / totalCredits : 0;
+            document.getElementById('MehediGpa').innerText = res.toFixed(2);
+            document.getElementById('MehediFailStatus').innerText = "N/A";
+            document.getElementById('MehediOptionalGain').innerText = "—";
+        }
+    }
+
+    // --- INITIALIZATION ---
+    function exportToPDF() {
+        const activeToolId = document.querySelector('.tool-section.active').id;
+        let element, filename;
+
+        if (activeToolId === 'gpa-tool') {
+            const container = document.createElement('div');
+            container.style.padding = '20px';
+            container.style.backgroundColor = '#ffffff';
+            container.style.color = '#000000';
+            
+            const title = document.createElement('h1');
+            title.textContent = 'GPA Calculator Result';
+            title.style.color = '#2563eb';
+            title.style.marginBottom = '10px';
+            container.appendChild(title);
+
+            const semesterName = document.getElementById('MehediSemesterName').value || 'GPA Report';
+            const subtitle = document.createElement('p');
+            subtitle.textContent = `Term: ${semesterName}`;
+            subtitle.style.color = '#666';
+            subtitle.style.marginBottom = '20px';
+            container.appendChild(subtitle);
+
+            // Subjects table
+            if (subjects.length > 0) {
+                const tableDiv = document.createElement('div');
+                tableDiv.style.marginBottom = '20px';
+                
+                const tableTitle = document.createElement('h3');
+                tableTitle.textContent = 'Subject Details';
+                tableTitle.style.color = '#2563eb';
+                tableTitle.style.marginBottom = '10px';
+                tableDiv.appendChild(tableTitle);
+
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                table.style.marginBottom = '20px';
+
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr style="background-color: #f0f0f0; border-bottom: 2px solid #2563eb;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Subject</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Marks</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Credit</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Grade</th>
+                        <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">GP</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                subjects.forEach((sub, idx) => {
+                    const gradeObj = getGrade(sub.marks);
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid #ddd';
+                    tr.innerHTML = `
+                        <td style="padding: 10px; border: 1px solid #ddd;">${sub.name}</td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">${sub.marks}</td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">${sub.credit}</td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">${gradeObj.letter}</td>
+                        <td style="padding: 10px; text-align: center; border: 1px solid #ddd; font-weight: bold; color: #2563eb;">${gradeObj.gp.toFixed(2)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+                tableDiv.appendChild(table);
+                container.appendChild(tableDiv);
+            }
+
+            // Summary section
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.display = 'grid';
+            summaryDiv.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            summaryDiv.style.gap = '15px';
+            summaryDiv.style.marginTop = '20px';
+
+            const gpaValue = document.getElementById('MehediGpa').innerText;
+            const statusValue = document.getElementById('MehediFailStatus').innerText;
+            const optionalValue = document.getElementById('MehediOptionalGain').innerText;
+
+            [
+                { label: 'GPA', value: gpaValue, color: '#2563eb' },
+                { label: 'Status', value: statusValue, color: statusValue === 'Pass' ? '#16a34a' : '#dc2626' },
+                { label: 'Optional Gain', value: optionalValue, color: '#f59e0b' }
+            ].forEach(item => {
+                const box = document.createElement('div');
+                box.style.padding = '15px';
+                box.style.border = '2px solid ' + item.color;
+                box.style.borderRadius = '8px';
+                box.style.textAlign = 'center';
+                box.style.backgroundColor = item.color + '10';
+
+                const label = document.createElement('p');
+                label.textContent = item.label;
+                label.style.margin = '0 0 8px 0';
+                label.style.color = '#666';
+                label.style.fontWeight = '600';
+                box.appendChild(label);
+
+                const value = document.createElement('p');
+                value.textContent = item.value;
+                value.style.margin = '0';
+                value.style.fontSize = '24px';
+                value.style.fontWeight = 'bold';
+                value.style.color = item.color;
+                box.appendChild(value);
+
+                summaryDiv.appendChild(box);
+            });
+            container.appendChild(summaryDiv);
+
+            const footer = document.createElement('p');
+            footer.textContent = '— Generated by Student ToolKit by Mehedi Hasan Shihab —';
+            footer.style.textAlign = 'center';
+            footer.style.marginTop = '30px';
+            footer.style.color = '#999';
+            footer.style.fontSize = '12px';
+            container.appendChild(footer);
+
+            element = container;
+            filename = `GPA_Report_${semesterName.replace(/\s+/g, '_')}.pdf`;
+        } else {
+            const container = document.createElement('div');
+            container.style.padding = '20px';
+            container.style.backgroundColor = '#ffffff';
+            container.style.color = '#000000';
+
+            const title = document.createElement('h1');
+            title.textContent = 'Age Calculator Result';
+            title.style.color = '#2563eb';
+            title.style.marginBottom = '10px';
+            container.appendChild(title);
+
+            const dob = document.getElementById('MehediDob').value;
+            const ageAt = document.getElementById('MehediAgeAt').value;
+            const years = document.getElementById('resYears').innerText;
+            const months = document.getElementById('resMonths').innerText;
+            const days = document.getElementById('resDays').innerText;
+
+            const info = document.createElement('div');
+            info.style.marginBottom = '20px';
+            info.innerHTML = `
+                <p style="margin: 8px 0;"><strong>Date of Birth:</strong> ${dob}</p>
+                <p style="margin: 8px 0;"><strong>Age Calculated At:</strong> ${ageAt}</p>
+            `;
+            container.appendChild(info);
+
+            const resultDiv = document.createElement('div');
+            resultDiv.style.display = 'grid';
+            resultDiv.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            resultDiv.style.gap = '15px';
+            resultDiv.style.marginTop = '20px';
+
+            [
+                { label: 'Years', value: years, color: '#2563eb' },
+                { label: 'Months', value: months, color: '#16a34a' },
+                { label: 'Days', value: days, color: '#f59e0b' }
+            ].forEach(item => {
+                const box = document.createElement('div');
+                box.style.padding = '20px';
+                box.style.border = '2px solid ' + item.color;
+                box.style.borderRadius = '8px';
+                box.style.textAlign = 'center';
+                box.style.backgroundColor = item.color + '10';
+
+                const label = document.createElement('p');
+                label.textContent = item.label;
+                label.style.margin = '0 0 10px 0';
+                label.style.color = '#666';
+                label.style.fontWeight = '600';
+                box.appendChild(label);
+
+                const value = document.createElement('p');
+                value.textContent = item.value;
+                value.style.margin = '0';
+                value.style.fontSize = '28px';
+                value.style.fontWeight = 'bold';
+                value.style.color = item.color;
+                box.appendChild(value);
+
+                resultDiv.appendChild(box);
+            });
+            container.appendChild(resultDiv);
+
+            const footer = document.createElement('p');
+            footer.textContent = '— Generated by Student ToolKit by Mehedi Hasan Shihab —';
+            footer.style.textAlign = 'center';
+            footer.style.marginTop = '30px';
+            footer.style.color = '#999';
+            footer.style.fontSize = '12px';
+            container.appendChild(footer);
+
+            element = container;
+            filename = `Age_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+        }
+
+        const opt = {
+            margin: 10,
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+        };
+
+        html2pdf().set(opt).from(element).save();
+    }
+
+    document.getElementById('MehediExportPDF').onclick = exportToPDF;
+
+    // --- INITIALIZATION ---
+    document.getElementById('MehediAddSubject').onclick = () => addSubject();
+    document.getElementById('MehediToggleTheme').onclick = () => {
+        const b = document.body;
+        b.setAttribute('data-theme', b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    };
+    document.getElementById('MehediScale').onchange = () => renderTable();
+
+    // Seed Data
+    addSubject("Bangla", 75, 0, false);
+    addSubject("ICT", 85, 0, true);
+</script>
+</body>
+</html>
